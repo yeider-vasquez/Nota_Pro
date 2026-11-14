@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="NotaPro: plataforma para gestionar estudiantes, notas, tareas y boletines.">
+  <title>NotaPro · Gestión de notas estudiantiles</title>
+  <script>
+    /* Aplica el tema guardado antes de pintar para evitar parpadeo */
+    (function () {
+      try {
+        var t = localStorage.getItem('notapro.theme') ||
+          (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', t);
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- Iconos (sprite SVG) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 11l9-8 9 8M5 10v10h5v-6h4v6h5V10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-award" viewBox="0 0 24 24"><path d="M12 15a6 6 0 1 0 0-12 6 6 0 0 0 0 12zM8.2 13.9L7 22l5-3 5 3-1.2-8.1" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M9 11l3 3 8-8M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-file" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M8 13h8M8 17h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><path d="M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM12 16v-4M12 8h.01" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><path d="M12 17a5 5 0 1 0 0-10 5 5 0 0 0 0 10zM12 1v2M12 21v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6M10 11v6M14 11v6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-edit" viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><path d="M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM21 21l-4.3-4.3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-upload" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-print" viewBox="0 0 24 24"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v8H6z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-cap" viewBox="0 0 24 24"><path d="M22 10L12 5 2 10l10 5zM6 12v5c3 2.5 9 2.5 12 0v-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+</svg>
+
+<a class="skip" href="#contenido">Saltar al contenido</a>
+
+<div class="app">
+
+  <!-- ===== Menú de navegación ===== -->
+  <aside class="sidebar">
+    <div class="brand">
+      <span class="brand-logo"><svg class="ic"><use href="#i-cap"/></svg></span>
+      <div>
+        <strong>NotaPro</strong>
+        <small>Gestión académica</small>
+      </div>
+    </div>
+
+    <nav id="nav" class="nav" aria-label="Navegación principal">
+      <button class="nav-btn" data-view="dashboard"><svg class="ic"><use href="#i-home"/></svg><span>Panel</span></button>
+      <button class="nav-btn" data-view="estudiantes"><svg class="ic"><use href="#i-users"/></svg><span>Estudiantes</span></button>
+      <button class="nav-btn" data-view="notas"><svg class="ic"><use href="#i-award"/></svg><span>Notas</span></button>
+      <button class="nav-btn" data-view="tareas"><svg class="ic"><use href="#i-check"/></svg><span>Tareas</span></button>
+      <button class="nav-btn" data-view="boletin"><svg class="ic"><use href="#i-file"/></svg><span>Boletín</span></button>
+    </nav>
+
+    <div class="sidebar-foot">
+      <button id="themeToggle" class="theme-toggle" type="button" aria-label="Cambiar entre modo claro y oscuro">
+        <svg class="ic icon-moon"><use href="#i-moon"/></svg>
+        <svg class="ic icon-sun"><use href="#i-sun"/></svg>
+        <span id="themeLabel">Modo oscuro</span>
+      </button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <!-- ===== Encabezado ===== -->
+    <header class="topbar">
+      <div class="topbar-title">
+        <span class="brand-logo sm"><svg class="ic"><use href="#i-cap"/></svg></span>
+        <div>
+          <h1 id="viewTitle">Panel</h1>
+          <p id="viewSubtitle">Resumen general del rendimiento académico</p>
+        </div>
+      </div>
+      <button id="themeToggleTop" class="icon-btn" type="button" aria-label="Cambiar tema">
+        <svg class="ic icon-moon"><use href="#i-moon"/></svg>
+        <svg class="ic icon-sun"><use href="#i-sun"/></svg>
+      </button>
+    </header>
+
+    <!-- ===== Contenido principal ===== -->
+    <main id="contenido" class="content" tabindex="-1">
+
+      <!-- PANEL -->
+      <section id="view-dashboard" class="view" aria-labelledby="viewTitle">
+        <div class="kpis">
+          <article class="kpi"><span class="kpi-ic c1"><svg class="ic"><use href="#i-users"/></svg></span><div><small>Estudiantes</small><strong id="kpiStudents">0</strong></div></article>
+          <article class="kpi"><span class="kpi-ic c2"><svg class="ic"><use href="#i-award"/></svg></span><div><small>Promedio general</small><strong id="kpiAverage">–</strong></div></article>
+          <article class="kpi"><span class="kpi-ic c3"><svg class="ic"><use href="#i-check"/></svg></span><div><small>Aprobando / En riesgo</small><strong id="kpiPass">0 / 0</strong></div></article>
+          <article class="kpi"><span class="kpi-ic c4"><svg class="ic"><use href="#i-file"/></svg></span><div><small>Tareas pendientes</small><strong id="kpiTasks">0</strong></div></article>
+        </div>
+
+        <div class="grid-2">
+          <article class="card">
+            <header class="card-head"><h2>Promedio por materia</h2></header>
+            <div id="subjectBars" class="bars"></div>
+          </article>
+          <article class="card">
+            <header class="card-head"><h2>Mejores promedios</h2></header>
+            <ol id="ranking" class="ranking"></ol>
+          </article>
+        </div>
+
+        <div class="grid-2">
+          <article class="card">
+            <header class="card-head"><h2>Próximas entregas</h2><button class="link-btn" data-goto="tareas">Ver todas</button></header>
+            <ul id="upcoming" class="upcoming"></ul>
+          </article>
+          <article class="card">
+            <header class="card-head"><h2>Datos y respaldo</h2></header>
+            <p class="muted">Tu información se guarda automáticamente en este navegador. Puedes exportarla o cargar datos de ejemplo.</p>
+            <div class="btn-row">
+              <button id="btnExportJson" class="btn btn-ghost" type="button"><svg class="ic"><use href="#i-download"/></svg>Respaldo JSON</button>
+              <button id="btnExportCsv" class="btn btn-ghost" type="button"><svg class="ic"><use href="#i-download"/></svg>Notas CSV</button>
+              <label class="btn btn-ghost" for="fileImport"><svg class="ic"><use href="#i-upload"/></svg>Importar</label>
+              <input id="fileImport" type="file" accept="application/json" hidden>
+              <button id="btnDemo" class="btn btn-primary" type="button">Cargar datos de ejemplo</button>
+              <button id="btnReset" class="btn btn-danger" type="button">Borrar todo</button>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- ESTUDIANTES -->
+      <section id="view-estudiantes" class="view" hidden>
+        <div class="grid-form">
+          <article class="card">
+            <header class="card-head"><h2 id="studentFormTitle">Nuevo estudiante</h2></header>
+            <form id="studentForm" novalidate>
+              <input type="hidden" name="id">
+              <div class="field">
+                <label for="stName">Nombre completo</label>
+                <input id="stName" name="name" type="text" placeholder="Ej. Laura Gómez Ríos" autocomplete="off">
+                <p class="error" role="alert"></p>
+              </div>
+              <div class="field">
+                <label for="stDoc">Documento</label>
+                <input id="stDoc" name="doc" type="text" inputmode="numeric" placeholder="Solo números (5 a 12 dígitos)" autocomplete="off">
+                <p class="error" role="alert"></p>
+              </div>
+              <div class="field">
+                <label for="stGrade">Curso</label>
+                <select id="stGrade" name="grade">
+                  <option value="">Selecciona…</option>
+                  <option>Sexto</option><option>Séptimo</option><option>Octavo</option>
+                  <option>Noveno</option><option>Décimo</option><option>Undécimo</option>
+                </select>
+                <p class="error" role="alert"></p>
+              </div>
+              <div class="field">
+                <label for="stEmail">Correo (opcional)</label>
+                <input id="stEmail" name="email" type="email" placeholder="estudiante@correo.com" autocomplete="off">
+                <p class="error" role="alert"></p>
+              </div>
+              <div class="btn-row">
+                <button class="btn btn-primary" type="submit" id="studentSubmit"><svg class="ic"><use href="#i-plus"/></svg><span>Registrar</span></button>
+                <button class="btn btn-ghost" type="button" id="studentCancel" hidden>Cancelar</button>
+              </div>
+            </form>
+          </article>
+
+          <article class="card">
+            <header class="card-head">
+              <h2>Listado de estudiantes</h2>
+              <div class="search"><svg class="ic"><use href="#i-search"/></svg><input id="studentSearch" type="search" placeholder="Buscar por nombre, documento o curso" aria-label="Buscar estudiantes"></div>
+            </header>
+            <div class="table-wrap">
+              <table class="table">
+                <thead><tr><th>Estudiante</th><th>Documento</th><th>Curso</th><th>Promedio</th><th class="right">Acciones</th></tr></thead>
+                <tbody id="studentsBody"></tbody>
+              </table>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- NOTAS -->
+      <section id="view-notas" class="view" hidden>
+        <div class="grid-form">
+          <article class="card">
+            <header class="card-head"><h2 id="gradeFormTitle">Registrar nota</h2></header>
+            <form id="gradeForm" novalidate>
+              <input type="hidden" name="id">
+              <div class="field">
+                <label for="grStudent">Estudiante</label>
+                <select id="grStudent" name="studentId"></select>
+                <p class="error" role="alert"></p>
+              </div>
+              <div class="field">
+                <label for="grSubject">Materia</label>
+                <input id="grSubject" name="subject" type="text" list="subjectList" placeholder="Ej. Matemáticas" autocomplete="off">
+                <datalist id="subjectList"></datalist>
+                <p class="error" role="alert"></p>
+              </div>
+              <div class="row-2">
+                <div class="field">
+                  <label for="grType">Actividad</label>
+                  <select id="grType" name="type">
+                    <option value="">Selecciona…</option>
+                    <option>Quiz</option><option>Taller</option><option>Parcial</option>
+                    <option>Proyecto</option><option>Exposición</option><option>Examen final</option>
+                  </select>
+                  <p class="error" role="alert"></p>
+                </div>
+                <div class="field">
+                  <label for="grScore">Nota (0.0 – 5.0)</label>
+                  <input id="grScore" name="score" type="number" step="0.1" min="0" max="5" inputmode="decimal" placeholder="4.0">
+                  <p class="error" role="alert"></p>
+                </div>
+              </div>
+              <div class="field">
+                <label for="grDate">Fecha</label>
+                <input id="grDate" name="date" type="date">
+                <p class="error" role="alert"></p>
+              </div>
+              <div class="field">
+                <label for="grNote">Observación (opcional)</label>
+                <textarea id="grNote" name="note" rows="2" maxlength="140" placeholder="Comentario breve"></textarea>
+                <p class="error" role="alert"></p>
+              </div>
+              <div class="btn-row">
+                <button class="btn btn-primary" type="submit" id="gradeSubmit"><svg class="ic"><use href="#i-plus"/></svg><span>Guardar nota</span></button>
+                <button class="btn btn-ghost" type="button" id="gradeCancel" hidden>Cancelar</button>
+              </div>
+            </form>
+          </article>
+
+          <article class="card">
+            <header class="card-head">
+              <h2>Historial de notas</h2>
+              <div class="filters">
+                <select id="gradeFilterStudent" aria-label="Filtrar por estudiante"></select>
+                <div class="search"><svg class="ic"><use href="#i-search"/></svg><input id="gradeSearch" type="search" placeholder="Materia o actividad" aria-label="Buscar notas"></div>
+              </div>
+            </header>
+            <div class="table-wrap">
+              <table class="table">
+                <thead><tr><th>Fecha</th><th>Estudiante</th><th>Materia</th><th>Actividad</th><th>Nota</th><th class="right">Acciones</th></tr></thead>
+                <tbody id="gradesBody"></tbody>
+              </table>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- TAREAS -->
+      <section id="view-tareas" class="view" hidden>
+        <div class="grid-form">
+          <article class="card">
+            <header class="card-head"><h2 id="taskFormTitle">Nueva tarea</h2></header>
+            <form id="taskForm" novalidate>
+              <input type="hidden" name="id">
+              <div class="field">
+                <label for="tkTitle">Título</label>
+                <input id="tkTitle" name="title" type="text" placeholder="Ej. Taller de fracciones" autocomplete="off">
+                <p class="error" role="alert"></p>
+              </div>
+              <div class="field">
+                <label for="tkSubject">Materia</label>
+                <input id="tkSubject" name="subject" type="text" list="subjectList" placeholder="Ej. Matemáticas" autocomplete="off">
+                <p class="error" role="alert"></p>
+              </div>
+              <div class="row-2">
+                <div class="field">
+                  <label for="tkDue">Fecha de entrega</label>
+                  <input id="tkDue" name="due" type="date">
+                  <p class="error" role="alert"></p>
+                </div>
+                <div class="field">
+                  <label for="tkPriority">Prioridad</label>
+                  <select id="tkPriority" name="priority">
+                    <option value="">Selecciona…</option>
+                    <option value="alta">Alta</option><option value="media">Media</option><option value="baja">Baja</option>
+                  </select>
+                  <p class="error" role="alert"></p>
+                </div>
+              </div>
+              <div class="field">
+                <label for="tkNotes">Detalles (opcional)</label>
+                <textarea id="tkNotes" name="notes" rows="2" maxlength="160" placeholder="Instrucciones o recordatorios"></textarea>
+                <p class="error" role="alert"></p>
+              </div>
+              <div class="btn-row">
+                <button class="btn btn-primary" type="submit" id="taskSubmit"><svg class="ic"><use href="#i-plus"/></svg><span>Guardar tarea</span></button>
+                <button class="btn btn-ghost" type="button" id="taskCancel" hidden>Cancelar</button>
+              </div>
+            </form>
+          </article>
+
+          <article class="card">
+            <header class="card-head">
+              <h2>Mis tareas académicas</h2>
+              <div class="filters">
+                <select id="taskFilterStatus" aria-label="Filtrar por estado">
+                  <option value="todas">Todas</option><option value="pendientes">Pendientes</option><option value="completadas">Completadas</option>
+                </select>
+                <select id="taskFilterPriority" aria-label="Filtrar por prioridad">
+                  <option value="">Toda prioridad</option><option value="alta">Alta</option><option value="media">Media</option><option value="baja">Baja</option>
+                </select>
+                <div class="search"><svg class="ic"><use href="#i-search"/></svg><input id="taskSearch" type="search" placeholder="Buscar tarea" aria-label="Buscar tareas"></div>
+              </div>
+            </header>
+            <ul id="tasksList" class="tasks"></ul>
+          </article>
+        </div>
+      </section>
+
+      <!-- BOLETÍN -->
+      <section id="view-boletin" class="view" hidden>
+        <article class="card" id="reportCard">
+          <header class="card-head no-print">
+            <h2>Boletín de calificaciones</h2>
+            <div class="filters">
+              <select id="reportStudent" aria-label="Seleccionar estudiante"></select>
+              <button id="btnPrint" class="btn btn-ghost" type="button"><svg class="ic"><use href="#i-print"/></svg>Imprimir</button>
+            </div>
+          </header>
+          <div id="reportBody"></div>
+        </article>
+      </section>
+
+    </main>
+
+    <!-- ===== Pie de página ===== -->
+    <footer class="footer">
+      <span>© <span id="year"></span> NotaPro · Técnico en Codificación de Software</span>
+    </footer>
+  </div>
+</div>
+
+<!-- Confirmación -->
+<dialog id="confirmDialog" aria-labelledby="confirmTitle">
+  <form method="dialog" class="dialog-box">
+    <h3 id="confirmTitle">¿Confirmar acción?</h3>
+    <p id="confirmText"></p>
+    <div class="btn-row end">
+      <button value="cancel" class="btn btn-ghost">Cancelar</button>
+      <button value="ok" class="btn btn-danger" id="confirmOk">Eliminar</button>
+    </div>
+  </form>
+</dialog>
+
+<div id="toasts" class="toasts" aria-live="polite"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
